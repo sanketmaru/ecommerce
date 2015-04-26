@@ -2,20 +2,20 @@ var express = require('express');
 var path = require('path');
 var http = require('http');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var config = require('./config/default');
 var orderRoutes = require('./routes/order');
 var productRoutes = require('./routes/product');
+var userRoutes = require('./routes/user');
 var mongoose = require('mongoose');
-
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 
 var app = express();
 
 // get an instance of the express Router
 var router = express.Router();
-
 
 // Workers can share any TCP connection
 app.listen(config.port, function() {
@@ -24,24 +24,42 @@ app.listen(config.port, function() {
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-//app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api', router);
 
+//require for passport authentication
+//app.use(session({ secret: 'ynwalivfc' })); // session secret
+app.use(passport.initialize());
+app.use(passport.session()); // persistent login sessions
+//app.use(flash()); // use connect-flash for flash messages stored in session
+
+//set up the routes
 orderRoutes(router);
 productRoutes(router);
+userRoutes(router, passport, app);
+
+app.use('/login', function(req, res) {
+    // render the page and pass in any flash data if it exists
+    res.render('login');
+});
+
+// show the signup form
+app.get('/signup', function(req, res) {
+    // render the page and pass in any flash data if it exists
+    res.render('signup');
+});
+
+app.use('/', function(req, res) {
+    res.render('index');
+});
+
 
 // Connect to database
 mongoose.connect(config.mongo.uri, config.mongo.options);
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -50,7 +68,6 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-// error handlers
 
 app.use(function(req, res, next) {
   res.setHeader("Pragma", "no-cache");
