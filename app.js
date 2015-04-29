@@ -10,7 +10,7 @@ var productRoutes = require('./routes/product');
 var userRoutes = require('./routes/user');
 var mongoose = require('mongoose');
 var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
+var passportConfig = require('./config/passport');
 
 var app = express();
 
@@ -37,10 +37,14 @@ app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 //app.use(flash()); // use connect-flash for flash messages stored in session
 
+//configure passport authentication strategy
+passportConfig(passport);
+
 //set up the routes
 orderRoutes(router);
 productRoutes(router);
-userRoutes(router, passport, app);
+userRoutes(router);
+
 
 app.use('/login', function(req, res) {
     // render the page and pass in any flash data if it exists
@@ -59,7 +63,11 @@ app.use('/', function(req, res) {
 
 
 // Connect to database
-mongoose.connect(config.mongo.uri, config.mongo.options);
+var mongooseConnection = mongoose.connect(config.mongo.uri, config.mongo.options).connection;
+mongooseConnection.on('error', function(err) { console.log("mongoose error :- " + err.message); });
+mongooseConnection.once('open', function() {
+  console.log("mongodb connection open");
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
