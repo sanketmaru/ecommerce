@@ -10,6 +10,7 @@ var productRoutes = require('./routes/product');
 var userRoutes = require('./routes/user');
 var mongoose = require('mongoose');
 var passport = require('passport');
+var session = require('express-session');
 var passportConfig = require('./config/passport');
 
 var app = express();
@@ -28,22 +29,17 @@ app.set('view engine', 'ejs');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 app.use('/api', router);
 
 //require for passport authentication
-//app.use(session({ secret: 'ynwalivfc' })); // session secret
+app.use(session({ secret: 'ynwalivfc' })); // session secret
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
-//app.use(flash()); // use connect-flash for flash messages stored in session
 
 //configure passport authentication strategy
 passportConfig(passport);
-
-//set up the routes
-orderRoutes(router);
-productRoutes(router);
-userRoutes(router);
 
 
 app.use('/login', function(req, res) {
@@ -60,6 +56,11 @@ app.get('/signup', function(req, res) {
 app.use('/', function(req, res) {
     res.render('index');
 });
+
+//set up the routes
+orderRoutes(router);
+productRoutes(router);
+userRoutes(router);
 
 
 // Connect to database
