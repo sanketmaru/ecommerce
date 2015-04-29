@@ -15,24 +15,29 @@ describe('User', function() {
 
   after(function(done) {
    mongoose.connection.close()
-   //done();
+   done();
   });
 
   beforeEach(function(done) {
-  var user = new User({
-    username: 'test',
-    password: 'test'
-  });
+    var user = new User({
+      username: 'test',
+      password: 'test'
+    });
 
-  user.save(function(error) {
-    if (error) console.log('error' + error.message);
-    else console.log('no error');
-    done();
-  });
+    user.save(function(error) {
+      if (error){
+        console.log('error' + error.message);
+      }
+      else {
+        console.log('no error');
+      }
+      done();
+    });
   });
 
   it('find a user by username', function(done) {
-    User.findOne({ username: 'test' }, function(err, account) {
+    User.findOne({ username: 'test' }, function(err, user) {
+      console.log("user" + user);
       user.username.should.eql('test');
       console.log("username: ", user.username)
       done();
@@ -40,7 +45,7 @@ describe('User', function() {
   });
 
   afterEach(function(done) {
-    User.remove({}, function() {
+    User.remove({username: 'test'}, function() {
       done();
     });
   });

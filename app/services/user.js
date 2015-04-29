@@ -7,9 +7,26 @@ var userService = Object.create(service);
 userService.name = "UserService";
 
 userService.authenticate = Promise.method(function(inputParams){
-  User.findOne({'username' : inputParams.userName}, function(err, user){
-    console.log("error" + error);
+  User.findOne({'username' : inputParams.username}, function(err, user){
+    console.log("error" + err);
     console.log("user" + user);
+    return user;
+  });
+});
+
+userService.signup = Promise.method(function(inputParams){
+  var user = new User({
+    username: inputParams.username,
+    password: inputParams.password
+  });
+
+  return user.save(function(error) {
+    if (error){
+      console.log('error' + error.message);
+    }
+    else {
+      console.log('no error');
+    }    
   });
 });
 
