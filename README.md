@@ -16,3 +16,5 @@ Future Work :-
 
 
 The code is deployed on heroku which can seen here :- https://smartecommerce.herokuapp.com
+
+** Not sure if heroku url sign up will work as it is backed up by mlab mongoose lab. But locally it should work. 
